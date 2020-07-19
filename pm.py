@@ -17,6 +17,139 @@ class Student():
     def set_num(self, num):
         self.num = num
 
+class File_pick():
+    def __init__(self, path):
+        self.path = path
+        self.file = open(self.path,"rb")
+        self.data = []
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        try:
+            return pickle.load(self.file)
+        except EOFError:
+            raise StopIteration()     
+
+    def read(self):
+        try:
+            while True:
+                data = pickle.load(self.file)
+                if not data:
+                    break
+                else:
+                    self.data.append(data)
+        except EOFError:
+            return self.data
+
+    def write(self, address=""):
+        if not address:
+            address = self.path
+        with open(address,"ab")as f:
+            pickle.dump(self.data,f)
+    
+    def __del__(self):
+        self.file.close()
+
+class File_csv():
+    def __init__(self, path):
+        self.path = path
+        self.file = open(self.path,"r")
+        self.f_csv = csv.reader(self.file)
+        self.data = []
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        try:
+            return self.f_csv.__next__()
+        except EOFError:
+            raise StopIteration()     
+
+    def read(self):
+        for i in self.f_csv:
+            self.data.append(i)   
+        return self.data
+
+    def write(self, address=""):
+        if not address:
+            address = self.path
+        with open(address,"w",newline='')as f:
+            f_csv = csv.writer(f)
+            f_csv.writerows(self.data)
+
+    def __del__(self):
+        self.file.close()
+
+class File_zip():
+    def __init__(self, path, address=""):
+        self.path = path
+        self.file = zipfile.ZipFile(self.path,"r")
+        self.address = address
+        self.data = []  
+        self.obj_flie = self.file.open(self.address,"r")
+    
+    def __iter__(self):
+        return self   
+
+    def __next__(self):
+        if self.address.endswith("csv"): 
+            try: 
+                f_csv = self.obj_flie.readline()
+                return str(f_csv,"UTF-8")
+            except EOFError:
+                raise StopIteration() 
+        if self.address.endswith("dat"):
+            try:
+                return pickle.load(self.obj_flie)
+            except EOFError:
+                raise StopIteration() 
+
+    def read(self):  
+        if self.address.endswith("csv"):
+            with self.file.open(self.address,"r")as f:
+                f_csv = f.readlines()
+            for i in f_csv:
+                self.data.append(str(i,"UTF-8"))     
+        if self.address.endswith("dat"):
+            with self.file.open(self.address,"r")as f:
+                try:
+                    while True:
+                        data = pickle.load(f)
+                        if not data:
+                            break
+                        else:
+                            self.data.append(data)
+                except EOFError:
+                    return self.data
+        return self.data
+          
+    def output(self, out_path=''):
+        if not out_path:
+            out_path = os.path.dirname(self.path)
+        self.file.extract(self.address,out_path)
+    
+    def input(self, source_path, in_path=''):
+        self.zip = zipfile.ZipFile(self.path,"a")
+        if not in_path:
+            in_path = source_path[len(os.path.dirname(source_path)):] 
+        self.zip.write(source_path,in_path)
+        self.zip.close()
+        self.file = zipfile.ZipFile(self.path,"r")
+    
+    def __del__(self):
+        self.obj_flie.close()
+        self.file.close()
+
+def file_read(file_class):
+    return file_class.read()
+
+def file_readline(file_class):
+    return file_class.__next__()
+
+"""
 class File_date():
     def __init__(self, path):
         self.path = path
@@ -72,12 +205,21 @@ class File_date():
         self.zip.close()
     
     def readzip_csvfile(self, file_path):#zip文件应该压缩的二进制文件，而csv只能处理文本文件 
-        self.zip_input(file_path)#只能处理zip一级子目录既file_path只能是文件名,若x\\x.csv
-        with open(os.path.dirname(self.path) + os.sep + file_path,"r")as f:#os.sep+file出错
-            f_csv = csv.reader(f)#csv.reader返回的是csv.reader格式，迭代此文件获得每一行元素写入date.list
-            for i in f_csv:
-                self.date_list.append(i)
+        #self.zip_input(file_path)#只能处理zip一级子目录既file_path只能是文件名,若x\\x.csv
+        #with open(os.path.dirname(self.path) + os.sep + file_path,"r")as f:#os.sep+file出错
+            #f_csv = csv.reader(f)#csv.reader返回的是csv.reader格式，迭代此文件获得每一行元素写入date.list
+            #for i in f_csv:
+                #self.date_list.append(i)
 
+        #self.zip = zipfile.ZipFile(self.path,"r")
+        #f_csv = self.zip.open(file_path,"r").read().decode("UTF-8")
+        #self.date_list = f_csv.split(" ")
+
+        self.zip = zipfile.ZipFile(self.path,"r")
+        f_csv = self.zip.open(file_path,"r").readlines()
+        for i in f_csv:
+            self.date_list.append(str(i,"UTF-8"))
+"""
 class Joseph():
     def __init__(self, star, step):
         self.__date = []
@@ -129,6 +271,25 @@ class Joseph():
     def get_date(self):
         return copy.deepcopy(self.__date)#若返回self.__date,那么a=get_dateget_date()，通过改变a就可改变self.__date
 
+student_pick = File_pick("D:/Python/student-date/pickle.txt")
+print(file_readline(student_pick))
+print(file_readline(student_pick))
+print(file_readline(student_pick))
+student_csv = File_csv("D:/Python/student-date/student.csv")
+print(file_readline(student_csv))
+print(file_readline(student_csv))
+print(file_readline(student_csv))
+print(file_readline(student_csv))
+print(file_readline(student_csv))
+print(file_readline(student_csv))
+student_zip_csv = File_zip("D:/Python/student-date/student.zip","student/student.csv")
+print(file_readline(student_zip_csv),end="")
+print(file_readline(student_zip_csv),end="")
+print(file_readline(student_zip_csv),end="")
+print(file_readline(student_zip_csv),end="")
+print(file_readline(student_zip_csv),end="")
+print(file_readline(student_zip_csv),end="")
+print(file_readline(student_zip_csv),end="")
 """
 file_student = File_date("D:\\Python\\student-date\\student.zip")
 file_student.readzip_csvfile("student/student.csv")
@@ -140,7 +301,7 @@ print("-----------------------------------")
 for i in student_joseph:
     print(i)
 """
-
+"""
 file_student = File_date("D:\\Python\\student-date\\student.zip")
 file_student.readzip_pickfile("student/student-pick.txt")
 student_joseph = Joseph(1,2)
@@ -150,7 +311,7 @@ for i in file_student.date_list:
 print("-----------------------------------")
 for i in student_joseph:
     print(i.name)
-
+"""
 """
 student_pb = Student("pb")
 student_z1 = Student("z1")
