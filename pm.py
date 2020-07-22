@@ -187,77 +187,7 @@ def file_readline(path):
         if x.match_file(path):
             data = x(path)
     return data.__next__()
-"""
-class File_date():
-    def __init__(self, path):
-        self.path = path
-        self.date_list = []
 
-    def pick_input(self):
-        with open(self.path,"rb")as f:
-            self.date_list = pickle.load(f)
-
-    def pick_output(self):
-        with open(self.path,"wb")as f:
-            pickle.dump(self.date_list,f)
-
-    def pick_save_as(self, address):
-        with open(str(address),"wb")as f:
-            pickle.dump(self.date_list,f)
-
-    def csv_input(self):
-        with open(self.path,"r")as f:
-            f_csv = csv.reader(f)#csv.reader返回的是csv.reader格式，迭代此文件获得每一行元素写入date.list
-            for i in f_csv:
-                self.date_list.append(i)
-    
-    def csv_output(self):
-        with open(self.path,"w",newline='')as f:
-            f_csv = csv.writer(f)
-            f_csv.writerows(self.date_list)
-
-    def csv_save_as(self, address):
-        with open(address,"w",newline='')as f:
-            f_csv = csv.writer(f)
-            f_csv.writerows(self.date_list)
-
-    def zip_input(self, file_path, address=''):
-        self.zip = zipfile.ZipFile(self.path,"r")
-        if not address:
-            address = os.path.dirname(self.path)
-        self.zip.extract(file_path,address)
-        self.zip.close()
-
-    def zip_output(self, file_path, zip_path=''):
-        self.zip = zipfile.ZipFile(self.path,"a")
-        if not zip_path:
-            zip_path = file_path[len(os.path.dirname(file_path)):] 
-        self.zip.write(file_path,zip_path)
-        self.zip.close()
-
-    def readzip_pickfile(self, file_path):
-        self.zip = zipfile.ZipFile(self.path,"r")   
-        file_in_zip = self.zip.open(file_path,"r")
-        self.date_list = pickle.load(file_in_zip)
-        file_in_zip.close()
-        self.zip.close()
-    
-    def readzip_csvfile(self, file_path):#zip文件应该压缩的二进制文件，而csv只能处理文本文件 
-        #self.zip_input(file_path)#只能处理zip一级子目录既file_path只能是文件名,若x\\x.csv
-        #with open(os.path.dirname(self.path) + os.sep + file_path,"r")as f:#os.sep+file出错
-            #f_csv = csv.reader(f)#csv.reader返回的是csv.reader格式，迭代此文件获得每一行元素写入date.list
-            #for i in f_csv:
-                #self.date_list.append(i)
-
-        #self.zip = zipfile.ZipFile(self.path,"r")
-        #f_csv = self.zip.open(file_path,"r").read().decode("UTF-8")
-        #self.date_list = f_csv.split(" ")
-
-        self.zip = zipfile.ZipFile(self.path,"r")
-        f_csv = self.zip.open(file_path,"r").readlines()
-        for i in f_csv:
-            self.date_list.append(str(i,"UTF-8"))
-"""
 class Joseph():
     def __init__(self, star, step):#start别省略
         self.__date = []#内部变量一根下划线
@@ -309,24 +239,6 @@ class Joseph():
     def get_date(self):
         return copy.deepcopy(self.__date)#若返回self.__date,那么a=get_dateget_date()，通过改变a就可改变self.__date
 
-"""
-student_pick = PickleReader("D:/Python/student-date/pickle.txt")
-student_pick.read()
-for i in student_pick:
-    print(i.name)
-
-student_csv = CsvReader("D:/Python/student-date/student.csv")
-for i in student_csv:
-    print(i)
-
-student_zip_csv = ZipReader("D:/Python/student-date/student.zip","student/student.csv")
-for i in student_zip_csv:
-    print(i,end="")
-
-student_zip_pick = ZipReader("D:/Python/student-date/student.zip","student/pickle.txt")
-for i in student_zip_pick:
-    print(i.name)
-"""
 data = file_read("D:/Python/student-date/pickle.txt")
 assert data[0].name == "pb"
 data = file_read("D:/Python/student-date/student.csv")
@@ -343,90 +255,4 @@ data = file_read("D:/Python/student-date/student.zip/student/pickle.txt")
 assert data[0].name == 'pb'
 data = file_readline("D:/Python/student-date/student.zip/student/pickle.txt")
 assert data.name == 'pb'
-"""
-student_pick = File_pick("D:/Python/student-date/pickle.txt")
-print(file_readline(student_pick))
-print(file_readline(student_pick))
-print(file_readline(student_pick))
-student_csv = File_csv("D:/Python/student-date/student.csv")
-print(file_readline(student_csv))
-print(file_readline(student_csv))
-print(file_readline(student_csv))
-print(file_readline(student_csv))
-print(file_readline(student_csv))
-print(file_readline(student_csv))
-student_zip_csv = File_zip("D:/Python/student-date/student.zip","student/student.csv")
-print(file_readline(student_zip_csv),end="")
-print(file_readline(student_zip_csv),end="")
-print(file_readline(student_zip_csv),end="")
-print(file_readline(student_zip_csv),end="")
-print(file_readline(student_zip_csv),end="")
-print(file_readline(student_zip_csv),end="")
-print(file_readline(student_zip_csv),end="")
-"""
 
-"""
-file_student = File_date("D:\\Python\\student-date\\student.zip")
-file_student.readzip_csvfile("student/student.csv")
-student_joseph = Joseph(2,3)
-for i in file_student.date_list:
-    print(i)
-    student_joseph.append(i)
-print("-----------------------------------")
-for i in student_joseph:
-    print(i)
-"""
-"""
-file_student = File_date("D:\\Python\\student-date\\student.zip")
-file_student.readzip_pickfile("student/student-pick.txt")
-student_joseph = Joseph(1,2)
-for i in file_student.date_list:
-    print(i.name)
-    student_joseph.append(i)
-print("-----------------------------------")
-for i in student_joseph:
-    print(i.name)
-"""
-"""
-student_pb = Student("pb")
-student_z1 = Student("z1")
-student_z2 = Student("z2")
-student_z3 = Student("z3")
-student_z4 = Student("z4")
-student_z5 = Student("z5")
-student_z6 = Student("z6")
-file_student = File_date("pickle.txt")
-file_student.date_list = [student_pb,student_z1,student_z2,student_z3,student_z4,student_z5,student_z6]
-file_student.pick_output()
-file_student.pick_input()
-for i in file_student.date_list:
-    print(i.name)
-student_joseph = Joseph(2,3)
-for i in range(len(file_student.date_list)):
-    student_joseph.append(file_student.date_list[i])
-print("---------------------------------")
-for i in student_joseph:
-    print(i.name)
-"""
-
-"""
-file_student_csv = File_date("student.csv")
-file_student_csv.date_list = [["num","name","sex" ,"age"], 
-                              [1    ,"pb"  ,MALE  ,23   ],                       
-                              [2    ,"le"  ,FEMALE,20   ],
-                              [3    ,"zs"  ,MALE  ,22   ],
-                              [4    ,"ls"  ,FEMALE,24   ],
-                              [5    ,"ww"  ,FEMALE,26   ],
-                              [6    ,"zl"  ,MALE  ,22   ],]
-file_student_csv.csv_output()
-file_student_csv.date_list = []
-file_student_csv.csv_input()
-for i in file_student_csv.date_list:
-    print(i)
-student_joseph = Joseph(7,2)
-for i in file_student_csv.date_list:
-    student_joseph.append(i)
-print("-------------------------------")
-for i in student_joseph:
-    print(i)
-"""
